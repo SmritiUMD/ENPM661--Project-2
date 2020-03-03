@@ -1,0 +1,250 @@
+import numpy as np
+import cv2
+
+def mapDef(start_position,goal_position,updated_map_point_robot)
+display_map = updated_map_point_robot
+    print(display_map.shape)
+
+    plt.figure(figsize=(100,200))
+
+    for i in range(0,display_map.shape[0]):
+        for j in range(0,display_map.shape[1]):
+            if display_map[i,j] == 1:
+                plt.plot(j,100-i,'k.')
+                
+    plt.xlim(0,200)
+    plt.ylim(0,100)
+    plt.grid(True)
+    plt.show()
+
+def startNode():
+    x1 = int (input("Enter an x1 coordinate: "))
+    y1 = int (input("Enter an y1 coordinate: "))
+    start_node = []
+
+    if x1 not in range(0,200) or y1 not in range(0,100):
+        print("Position not permitted")
+        exit()
+    if x1 in range(90,110) or y1 in range(40,60):
+        print("Position not permitted")
+        exit()
+    else:
+        start_node.append(x1,y1)
+    
+    return start_node
+
+def goalNode():
+    x2 = int(input("enter the goal x coordinate"))
+    y2 = int(input("enter the goal y coordinate"))
+    
+    goal_node = []
+
+    if x2 not in range(0,200) or y2 not in range(0,100):
+        print("Position not permitted")
+        exit()
+    if x2 in range(90,110) or y2 in range(40,60):
+        print("Position not permitted")
+        exit()
+    else:
+        goal_node.append(x2,y2)
+    
+    return goal_node
+
+height, width = 100, 200
+img = np.zeros((height, width, 3), np.uint8)
+img[:, :] = [255, 255, 255]
+
+
+def circle(x,y):
+    cv2.circle(img1,(225,50), 25, (0,255,0), -1)
+#     cv2.imwrite("final_map.jpg", img1)
+    cv2.imshow('image', img1)
+    return img1
+
+def polygon():
+    pts = np.array([[25,15],[75,15],[100,50],[75,80],[50,50],[20,80]], np.int32)
+    pts = pts.reshape((-1,1,2))
+    cv2.polylines(img1,[pts],True,(0,0,255),1)
+#     cv2.imwrite("final_map.jpg", img1)
+    cv2.imshow('image', img1)
+    return img1
+
+def rod():
+    pts1 = np.array([[95,170],[30.88,133.5],[36.72,128.95],[100,161.45]], np.int32)
+    pts1 = pts1.reshape((-1,1,2))
+    cv2.polylines(img1,[pts1],True,(0,0,255),1)
+#     cv2.imwrite("final_map.jpg", img1)
+    cv2.imshow('image', img1)
+    return img1
+
+def rhombus():
+    pts2 = np.array([[200,175],[225,160],[250,175],[225,190]], np.int32)
+    pts2= pts2.reshape((-1,1,2))
+    cv2.polylines(img1,[pts2],True,(0,0,255),1)
+#     cv2.imwrite("final_map.jpg", img1)
+    cv2.imshow('image', img1)
+    return img1
+
+def ellipse():
+    img1=cv2.ellipse(img1,(150,100),(40,20),0,0,360,255,-1)
+#     cv2.imwrite("final_map.jpg", img1)
+    cv2.imshow('image', img1)
+    return img1
+
+
+#defining obstacles and the rejecting points inside them by detecting contours.
+
+image = cv2.imread('final_map.jpg')
+image = cv2.imshow('image', image)
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+canny = cv2.Canny(gray, 120, 255, 1)
+cnts = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+
+for c in cnts:
+    cv2.drawContours(image, [c], -1, (36, 255, 12), 2)
+    result = cv2.pointPolygonTest(c, point1, False)
+print(result)
+
+cv2.imshow('image', image)
+cv2.waitKey()
+    
+# mapping = np.zeroes([200,100])
+
+# def mapDef(mapping, cir_center, cir_radius, ver_1, ver_2):
+    
+    
+    
+def up(position):
+    current_position = copy.copy(position)
+    
+    new_pos = []
+
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+
+    if row == 0:
+        cost = False
+    else:
+        new_pos.append(([row-1, col], 1 )) 
+        cost = True
+
+    return new_pos, cost
+
+### To generated down node
+def down(position):
+    current_position = copy.copy(position)
+
+    new_pos = []
+
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+    
+    if row >= grid[0]:
+        cost = False
+    else:
+        new_pos.append(([row+1, col], 1 ))
+        cost = True
+
+    return new_pos, status
+
+### To generated left node
+def left(position):
+    current_position = copy.copy(position)
+
+    new_pos = []
+
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+    
+    if col == 0:
+        cost = False
+    else:
+        new_pos.append(([row, col-1], 1 )) 
+        cost = True
+
+    return new_pos, status
+
+### To generated right node
+def right(position):
+    current_position = copy.copy(position)
+
+    new_pos = []
+    
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+    
+    if col >= grid[1]:       
+        cost = False 
+    else:
+        new_pos.append(([row, col+1], 1 )) 
+        cost = True
+   
+    return new_pos, cost
+
+### To generated up left node
+def upLeft(position):
+    current_position = copy.copy(position)
+    
+    new_pos = []
+    
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+    if row == 0 or col == 0:
+        status = False    
+    else:
+        new_pos.append(([row-1, col-1], np.sqrt(2)))
+        cost = True
+    
+    return new_pos, cost
+
+### To generated up right node
+def upRight(position):
+    current_position = copy.copy(position)
+    
+    new_pos = []
+    
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+
+    if row == 0 or col >= grid[1]:
+        cost = False
+    else:
+        new_pos.append(([row-1, col+1],np.sqrt(2)))
+        cost = True
+    
+    return new_pos, cost
+
+### To generated down left node
+def downLeft(position):
+    current_position = copy.copy(position)
+    
+    new_pos = []
+    
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+    
+    if row >= grid[0] or col == 0:
+        cost = False
+    else:
+        new_pos.append(([row+1, col-1], np.sqrt(2)))
+        cost = True
+   
+    return new_pos, cost
+
+### To generated down right node
+def downRight(position):
+    current_position = copy.copy(position)
+
+    new_pos = []
+    
+    row = current_position[0][0][0]
+    col = current_position[0][0][1]
+    
+    if row >= grid[0] or col >= grid[1]:
+        cost = False
+    else:
+        new_pos.append(([row+1, col+1], np.sqrt(2)))  #+ current_position[0][1]
+        cost = True
+
+    return new_pos, cost

@@ -108,143 +108,51 @@ print(result)
 
 cv2.imshow('image', image)
 cv2.waitKey()
-    
-# mapping = np.zeroes([200,100])
 
-# def mapDef(mapping, cir_center, cir_radius, ver_1, ver_2):
-    
-    
-    
-def up(position):
-    current_position = copy.copy(position)
-    
-    new_pos = []
 
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
+import sys
+import math
 
-    if row == 0:
-        cost = False
-    else:
-        new_pos.append(([row-1, col], 1 )) 
-        cost = True
 
-    return new_pos, cost
+def check_obstacle(node):
+   # check
+   return True
 
-### To generated down node
-def down(position):
-    current_position = copy.copy(position)
+def explore(node, goal, i_cap, j_cap, parent_distance):
+   if node[0] < 0 or node[1] < 0 or node[0]>i_cap or node[1]>j_cap:
+       return 0
+   i = node[0]
+   j = node[1]
 
-    new_pos = []
+   if node[0] == goal[0] and node[1] == goal[1]:
+       return 1
 
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-    
-    if row >= grid[0]:
-        cost = False
-    else:
-        new_pos.append(([row+1, col], 1 ))
-        cost = True
+   paths = [(i,j+1),(i+1,j),(i+1,j+1)]
+   valid_paths = []
+   for path in paths:
+       if check_obstacle(path):
+           pass
+       valid_paths.append(path)
 
-    return new_pos, status
+   min_dist = 100000
+   min_path = None
+   for path in valid_paths:
+       distance = (path[0]-node[0]+path[1]-node[1])
+       if distance == 2 :
+           actual_distance = math.sqrt(2)+parent_distance
+       if distance == -2 :
+           actual_distance = parent_distance - math.sqrt(2)
+       if distance == 1 :
+           actual_distance = 1+parent_distance
+       if distance == -1 :
+           actual_distance = parent_distance - 1
+       possibilty = explore(path, goal, i_cap, j_cap, actual_distance)
+       if possibilty == 1 :
+           if actual_distance < min_dist:
+               min_path = path
+   if min_path == None:
+       return 0
+   else:
+       return 1
 
-### To generated left node
-def left(position):
-    current_position = copy.copy(position)
-
-    new_pos = []
-
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-    
-    if col == 0:
-        cost = False
-    else:
-        new_pos.append(([row, col-1], 1 )) 
-        cost = True
-
-    return new_pos, status
-
-### To generated right node
-def right(position):
-    current_position = copy.copy(position)
-
-    new_pos = []
-    
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-    
-    if col >= grid[1]:       
-        cost = False 
-    else:
-        new_pos.append(([row, col+1], 1 )) 
-        cost = True
-   
-    return new_pos, cost
-
-### To generated up left node
-def upLeft(position):
-    current_position = copy.copy(position)
-    
-    new_pos = []
-    
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-    if row == 0 or col == 0:
-        status = False    
-    else:
-        new_pos.append(([row-1, col-1], np.sqrt(2)))
-        cost = True
-    
-    return new_pos, cost
-
-### To generated up right node
-def upRight(position):
-    current_position = copy.copy(position)
-    
-    new_pos = []
-    
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-
-    if row == 0 or col >= grid[1]:
-        cost = False
-    else:
-        new_pos.append(([row-1, col+1],np.sqrt(2)))
-        cost = True
-    
-    return new_pos, cost
-
-### To generated down left node
-def downLeft(position):
-    current_position = copy.copy(position)
-    
-    new_pos = []
-    
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-    
-    if row >= grid[0] or col == 0:
-        cost = False
-    else:
-        new_pos.append(([row+1, col-1], np.sqrt(2)))
-        cost = True
-   
-    return new_pos, cost
-
-### To generated down right node
-def downRight(position):
-    current_position = copy.copy(position)
-
-    new_pos = []
-    
-    row = current_position[0][0][0]
-    col = current_position[0][0][1]
-    
-    if row >= grid[0] or col >= grid[1]:
-        cost = False
-    else:
-        new_pos.append(([row+1, col+1], np.sqrt(2)))  #+ current_position[0][1]
-        cost = True
-
-    return new_pos, cost
+explore((5,5), (195,295), 200, 300, 0)

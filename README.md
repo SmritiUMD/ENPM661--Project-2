@@ -1,4 +1,6 @@
-# ENPM661--Project-2
+# ENPM661--Project-2-
+Contributors- Smriti Gupta
+Musty Sri Sai Kaushik
 Repository containing the code for ENPM661 - Project 2. Implementation of Dijkstra algorithm
 
 To run the code, download both Dijkstra_rigid.py and Dijkstra_point.py for rigid and point robots respectively.

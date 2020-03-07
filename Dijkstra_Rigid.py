@@ -1,3 +1,11 @@
+######ENPM661- Planning for Autonomous Robots- Project_2- Implementation of Dijkstra's Algorithm###
+######Smriti Gupta-116748612#######################################################################
+######Musty Sri Sai Kaushik-116917094##############################################################
+
+
+
+
+
 import math
 import numpy as np
 from queue import PriorityQueue

@@ -1,114 +1,139 @@
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
 import math
-#x1 = int (input("Enter an x1 coordinate: "))
-#y1 = int (input("Enter an y1 coordinate: "))
-x1,y1= 1,1
-goal=120,50
-#if x1 not in range(0,200) or y1 not in range(0,100):
-    #print("Position not permitted")
-    #exit()
-#if x1 in range(90,110) or y1 in range(40,60):
-    #print("Position not permitted")
-    #exit()
-    
-height, width = 200, 300
-img = np.zeros((height, width), np.uint8)
-k=0
-def obstacle:
-	k=0
-	for x in range(width):
-		for y in range(height):
-			if (((x>=225 and x<=250) and (y>=((3/5)*(x-225)+160))) or ((x>=200 and x<=225) and (y>=((-3/5)*(x-225)+160)))):
-				img[y,x]=1
-				k=1
-			if ((x>=200 and x<=225) and (y>=((3/5)*(x-200)+175))) or ((x>=225 and x<=250) and (y>=((-3/5)*(x-225)+190))):
-				img[y,x]=0
-				k=1
-			if (x-225)**2+(y-50)**2<=625:
-				img[y,x]=1
-				k=1
-			if (x-150)**2/(40)**2+(y-100)**2/(20)**2<=1:
-				img[y,x]=1
-				k=1
-			if (((x>=30.875 and x<=35.875) and (y>=((-1.71)*(x-35.875)+135.5))) or ((x>=35.875 and x<=100) and (y>=((0.53)*(x-100)+161.45)))):
-				img[y,x]=1
-				k=1
-			if ((x>=30.875 and x<=95) and (y>=((0.5380)*(x-30.675)+135.5))) or ((x>=95 and x<=100) and (y>=((-1.71)*(x-95)+170))):
-				img[y,x]=0
-				k=1
-			if ((x>=25 and x<=75) and (80>=y>=15)) or ((x>=75 and x<=100) and (80>=y>=((7/5)*(x-75)+15))) or ( (x<=20 or x<=25) and (80>=y>=((-13)*(x-20)+80))):
-				img[y,x]=1
-				k=1
-			if ((x>=20 and x<=50) and (80>= y>=(-1)*(x-20)+80)) or ((x>=50 and x<=75) and (80>=y>=((6/5)*(x-75)+80))) or((x>=75 and x<=100) and (80>=y>=((-6/5)*(x-100)+50))): 
-				img[y,x]=0
-				k=1
-	return k
+import numpy as np
+from queue import PriorityQueue
+import cv2
+import time
 
-obstacle_=[]
-for i in range(0,300):
-    for j in range(0,200):
-        c=obstacle(i,j)
-        if c==1:
-            obstacle_.append([i,j])
-def start(initial):
-    c=obstacle(initial[0],initial[1])
-    if c ==1 or initial[0]  not in range(0,251) or (initial[1] not in range(0,151)):
-        print("Entry not Valid")
-        exit()
-    else:
-        pass
+grid_x = 200 #defining the grid width and height
+grid_y = 300
+img = np.zeros((grid_x, grid_y), np.uint8)
+d = 0
+start_time = time.time() #taking the run time start
+start_pos = [5, 195]  #defining the start position as per the requirements
+goal = [195,5] #defining the goal position as poer the requirements
+solvable = True
 
-def end(goal):
-    c=obstacle(goal[0],goal[1])
-    if c ==1 or goal[0] not in range(0,251) or goal[1] not in range(0,151):
-        print("Goal point inside obstacle space or not in workspace space or not a good entry for resolution")
-        exit()
-    else:
-        pass
-
-			
+for x in range(grid_y): 
+    for y in range(grid_x): #writing conditions to define obstacle space in the obstacle area
+        if (y>=(3/5)*x+25-d) and (y>=(-3/5)*x+295-d):
+            img[y][x]=1
+        if (y>=(3/5)*x+55+d) or (y>=(-3/5)*x+325+d):
+            img[y][x]=0
+        if (x-225)**2+(y-50)**2<=(25+d)**2:
+            img[y][x]=1
+        if (x-150)**2/(40+d)**2+(y-100)**2/(20+d)**2<=1:
+            img[y][x]=1
+        if (((x>=30.875 and x<=35.875) and (y>=((-1.71)*x+196.84-d))) or ((x>=35.875 and x<=100) and (y>=((0.53)*x+108.45-d)))):
+            img[y][x]=1
+        if ((x>=30.875 and x<=95) and (y>=((0.5380)*x+118.99+d))) or ((x>=95 and x<=100) and (y>=((-1.71)*x+332.45+d))):
+            img[y][x]=0
+        if (y>=(-7/5)*x+120 and y>=(7/5)*x-(90+d)) and (y<=(6/5)*x-10+d and y<=(-6/5)*x+170+d) :
+            img[y][x]=1
+        if (y<=(-7/5)*x+120) and y<=(7/5)*x-20 and y>=15-d:
+            img[y][x]=1
+        if y>=(7/5)*x-20 and y>=(-13)*x+340+d and y<=(-1)*x+100+d:
+            img[y][x]=1
+        if (y>=0 and y<=0+d):
+            img[y][x]=1
+        if (y<=200 and y>=(200-d)):
+            img[y][x]=1
+        if (x>=0 and x<=d):
+            img[y][x]=1
+        if (x<=300 and x>=(300-d)):
+            img[y][x]=1
+ #wriitng the condition for the case when start or goal node are defined in an obstacle
+if img[start_pos[0],start_pos[1]]==1 or img[goal[0],goal[1]]==1:
+    print("starting_node/goal_node is inside the obstacle. Please give valid nodes.")
+    solvable  =False
+else:
+    pass
 
 
 
+class Node:
+    def __init__(self, pos, cost, parent): #creating objects for position, cost and parent information
+        self.pos = pos
+        self.x = pos[0]
+        self.y = pos[1]
+        self.cost = cost
+        self.parent = parent
 
 
+def explore(node): #defining the function for exploring using dijkstra
+    i = node.x
+    j = node.y
+
+    paths = [(i, j + 1), (i + 1, j), (i - 1, j), (i, j - 1), (i + 1, j + 1), (i - 1, j - 1), (i - 1, j + 1),
+             (i + 1, j - 1)]  #creating a list with all the 8 directions 
+    valid_paths = []
+    for pos, path in enumerate(paths):
+        ### Checking if the value for that position is 1 and if it is 0, else we don't consider it a valid point
+        if not (path[0] >= grid_y or path[0] < 0 or path[1] >= grid_x or path[1] < 0):  ##writing the condition for the path that may be out of bounds
+            
+
+            if img[path[1]][path[0]] == 0:  #checking for the obstacle space
+                # print ('in 2nd if exp')
+                cost = math.sqrt(2) if pos > 3 else 1
+                valid_paths.append([path, cost])
+    return valid_paths #returning all the valid paths that pass the conditions
 
 
+q = PriorityQueue() #defining a priority queue
+map = np.zeros([grid_y, grid_x])
+visited = set([]) #creating visited nodes
+node_objects = {}
 
+####
+distance = {}
+for i in range(0, grid_y):
+    for j in range(0, grid_x):
+        distance[str([i, j])] = 99999999 #making the value of all the unvisited nodes as infinity
+#####
+distance[str(start_pos)] = 0 
+visited.add(str(start_pos))
+node = Node(start_pos, 0, None)
+node_objects[str(node.pos)] = node
+q.put([node.cost, node.pos])  # adding the cost values in a priority queue
+reached = False
 
+img_show = np.dstack([img.copy()*255, img.copy()*255, img.copy()*255]) # creating an image show function
+#start.time.time()
+if solvable:  #logic for Dijkstra to check if the nodes traversed is a goal else continue
+	while not q.empty():
+	    node_temp = q.get()
+	    node = node_objects[str(node_temp[1])]
+	    if node_temp[1][0] == goal[0] and node_temp[1][1] == goal[1]:
+	        print("Reached")
+	        node_objects[str(goal)] = Node(goal, node_temp[0], node)
+	        reached = True
+	        break
 
-k=2
-pygame.init()
-Black = [0, 0, 0]
-White = [255, 255, 255]
-blue=[0,255,255]
-green = [0,255,0]
-Size = [200,300]
-screen = pygame.display.set_mode(SIZE)
-pygame.display.set_caption("Dijkstra Point Robot") 
-clock = pygame.time.Clock()
-done = False
-while not done:
-    for event in pygame.event.get():   
-        if event.type == pygame.QUIT:  
-            done = True 
-    screen.fill(BLACK)
-    for i in obstacle_:
-        pygame.draw.rect(screen, WHITE, [i[0],150*k-i[1],k,k])
-    pygame.display.flip()
-    clock.tick(20)
-    for i in visited:
-        pygame.time.wait(1)
-        pygame.draw.rect(screen, green, [i[0],150*k-i[1],k,k])
-        pygame.display.flip()
-    for j in new_goal[::-1]:
-        pygame.time.wait(1)
-        pygame.draw.rect(screen, blue, [j[0], 150*k-j[1], k,k])
-        pygame.display.flip()
-    
-    pygame.display.flip()
+	    for next_node, cost in explore(node):
 
-    pygame.time.wait(15000)
-    done = True
+	        if str(next_node) in visited: #defining all the visited nodes and adding the cost values 
+	            cost_temp = cost + distance[str(node.pos)]
+	            if cost_temp < distance[str(next_node)]:
+	                distance[str(next_node)] = cost_temp
+	                node_objects[str(next_node)].parent = node
+	        else:
+	            visited.add(str(next_node)) #adding the next node value to the visited node
+	            img_show[next_node[1], next_node[0], :] = np.array([0,0,255])
+	            absolute_cost = cost + distance[str(node.pos)]
+	            distance[str(next_node)] = absolute_cost
+	            new_node = Node(next_node, absolute_cost, node_objects[str(node.pos)])
+	            node_objects[str(next_node)] = new_node
+	            q.put([absolute_cost, new_node.pos])  #using the queue to add get the least cost 
+	            # print(visited)
+
+	print("--- %s seconds ---" % (time.time() - start_time)) #printing the total time taken to run the logic
+	          
+	#cv2.imshow('img', img_show)
+	#cv2.waitKey(10)
+	goal_node = node_objects[str(goal)]
+	parent_node = goal_node.parent  #adding the previous node traveled from the goal using backtracking to the parent node
+	while parent_node:
+	    print(parent_node.pos, parent_node.cost)
+	    img_show[parent_node.pos[1], parent_node.pos[0],:] = np.array([255,0,0]) #using cv2.imshow to print the final path using backtracking
+	    parent_node = parent_node.parent
+	cv2.imshow('img', img_show)
+	cv2.waitKey(0)
